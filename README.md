@@ -10,6 +10,7 @@ In this project, the Instances are spanned across three different availability z
 - CI/CD tool of choice
 - Docker for containerization
 - GitHub Account
+- Install aws cli on your local machine.
 
 ## Infrastructure
 The AWS infrasctruture comprises of AWS services below:
