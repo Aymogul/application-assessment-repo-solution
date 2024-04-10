@@ -1,0 +1,81 @@
+name: Destroy Terraform Infra
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-java-application:
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Get Short SHA value
+        uses: benjlevesque/short-sha@v3.0
+        id: short-sha
+        with:
+          length: 6
+      
+      - uses: mr-smithers-excellent/docker-build-push@v6
+        name: Build & push Docker image
+        with:
+          image: aymogul/java-task
+          tags: latest, ${{ steps.short-sha.outputs.sha }}
+          registry: docker.io
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+  
+
+  deploy-new-image:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+      
+        - name: Clone Repo
+          uses: actions/checkout@v4
+
+        - name: Install Terraform
+          uses: hashicorp/setup-terraform@v3
+          
+        - name: Get Short SHA value
+          uses: benjlevesque/short-sha@v3.0
+          id: short-sha
+          with:
+            length: 6
+
+        - name: Configure AWS Access keys
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-region: eu-west-1
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+
+        - name: Update New Image in User data script
+          run: sed -i 's/latest/${{ steps.short-sha.outputs.sha }}/' script.sh
+
+        - name: Initialize Terraform
+          run: terraform init
+
+        - name: Validate Terraform COnfiguration
+          run: terraform validate
+
+        - name: Deploy New App version
+          run: terraform apply --auto-approve
