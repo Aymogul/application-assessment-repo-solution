@@ -4,6 +4,13 @@ In this project, I deployed a web application that is written in JAVA on AWS. Wh
 
 In this project, the Instances are spanned across three different availability zones that provides the infra with High availability. 
 
+## Prerequisites
+- AWS account with Access Key ID and Secret Acess Key
+- Terraform
+- CI/CD tool of choice
+- Docker for containerization
+- GitHub Account
+
 ## Infrastructure
 The AWS infrasctruture comprises of AWS services below:
 - VPC
