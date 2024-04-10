@@ -26,6 +26,8 @@ The AWS infrasctruture comprises of AWS services below:
 - Dockerhub
 - eu-west-2 region
 
+![Infrastructure Diagram](./screenshots/my-task-architecture.png)
+
  All resources packaged and deployed using terraform. In this project, the state file is stored in an s3 bucket `ay-cloud-height-tf-bucket-state`. Most of the resources made use of terraform modules provided by AWS from the terraform documentation.
 
  ## Autoscaling
